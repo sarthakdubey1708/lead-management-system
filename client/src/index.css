@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tokens live in tailwind.config.js. This file only holds global behavior (DESIGN.md sections 7-9). */
+
+:root {
+  --bottom-nav-h: 3.5rem; /* 56px, keep in sync with spacing.bottom-nav */
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+  }
+
+  body {
+    @apply bg-canvas font-sans text-body text-fg antialiased;
+    margin: 0;
+    overflow-x: hidden; /* safety net only; layouts must not rely on it */
+  }
+
+  /* One focus style for every interactive element. Never remove it. */
+  :focus-visible {
+    outline: 2px solid theme('colors.brand.600');
+    outline-offset: 2px;
+  }
+
+  /* 16px form text on mobile prevents iOS Safari zoom-on-focus; 14px from tablet up. */
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    input,
+    select,
+    textarea {
+      font-size: 0.875rem;
+      line-height: 1.375rem;
+    }
+  }
+
+  /* Numbers line up in columns (counts, dates, phone numbers). */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* ---- Safe areas (notch / home indicator). Requires viewport-fit=cover in index.html ---- */
+
+  /* Mobile top bar: sits below the status bar / notch. */
+  .safe-top-bar {
+    padding-top: env(safe-area-inset-top, 0px);
+    height: calc(theme('spacing.topbar') + env(safe-area-inset-top, 0px));
+  }
+
+  /* Mobile bottom navigation: 56px of content plus the home-indicator inset. */
+  .safe-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Page content on mobile: never hidden behind the fixed bottom nav. */
+  .pb-above-nav {
+    padding-bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 1rem);
+  }
+  @media (min-width: 768px) {
+    .pb-above-nav {
+      padding-bottom: 1.5rem;
+    }
+  }
+
+  /* Toasts on mobile float above the bottom nav. */
+  .toast-offset {
+    bottom: calc(var(--bottom-nav-h) + env(safe-area-inset-bottom, 0px) + 0.75rem);
+  }
+  @media (min-width: 768px) {
+    .toast-offset {
+      bottom: auto;
+    }
+  }
+
+  /* Full-screen mobile form sheet: footer buttons clear the home indicator. */
+  .safe-sheet-footer {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Reduced motion: no movement, effectively instant state changes. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
