@@ -27,45 +27,79 @@ BizLeap is a Mini CRM for tracking prospective customers from first contact thro
 - A running MongoDB instance accessible to the API. The setup below uses `127.0.0.1:27017` and was verified with MongoDB 8.3.4. The API also accepts `mongodb+srv://` connection strings.
 - Git and a terminal. The examples use Windows PowerShell. On a shell without the Windows script shim, use `npm` in place of `npm.cmd`.
 
-## Local installation
+## Local Installation
 
-Clone the repository using its GitHub clone URL and install the locked dependencies in both packages.
+### 1. Prerequisites
 
-```powershell
-$repositoryUrl = Read-Host 'Enter the GitHub clone URL'
-git clone $repositoryUrl bizleap-mini-crm
-Set-Location bizleap-mini-crm
-$projectRoot = (Get-Location).Path
+Make sure you have Node.js, npm, Git and MongoDB installed on your machine.
 
-Set-Location (Join-Path $projectRoot 'server')
-npm.cmd ci
-Set-Location (Join-Path $projectRoot 'client')
-npm.cmd ci
+### 2. Clone the repository
 
-Set-Location (Join-Path $projectRoot 'server')
-if (-not (Test-Path -LiteralPath .env)) {
-    Copy-Item -LiteralPath .env.example -Destination .env
-}
+```bash
+git clone https://github.com/sarthakdubey1708/lead-management-system.git
+cd lead-management-system
+```
+
+### 3. Backend setup
+
+```bash
+cd server
+npm install
+```
+
+Create a `.env` file inside the `server` directory using `.env.example` as a reference.
+
+Configure the following environment variables:
+
+```env
+PORT=5000
+MONGODB_URI=mongodb://127.0.0.1:27017/lead_management
+APP_ORIGIN=http://localhost:5173
+JWT_SECRET=your_generated_secret
+ADMIN_NAME=Admin
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=your_secure_password
+```
+
+Generate a secure JWT secret using:
+
+```bash
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Open `server/.env` in your editor. Paste the generated 64-character hex value into `JWT_SECRET` and set `MONGODB_URI` for your MongoDB instance. Choose your own `ADMIN_NAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD`. The password needs at least 12 characters and at most 72 UTF-8 bytes. Quote the value if it contains a `#` or intentional leading or trailing spaces. Keep this file and the generated values private. The frontend uses a relative `/api` URL and needs no `.env` file for local setup.
+Replace `JWT_SECRET` with the generated value and choose your own administrator credentials. The password must contain at least 12 characters and no more than 72 UTF-8 bytes.
 
-With MongoDB running, seed the administrator and 40 fictional leads, then start Express in the `server` terminal.
+With MongoDB running, seed the administrator account and 40 fictional sample leads:
 
-```powershell
-npm.cmd run seed
-npm.cmd run dev
+```bash
+npm run seed
 ```
 
-Open a second PowerShell terminal at the repository root and start Vite.
+Start the backend:
 
-```powershell
-Set-Location client
-npm.cmd run dev
+```bash
+npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) and sign in with the email and password used in the first successful seed. Use this exact browser origin with the default `APP_ORIGIN`. Vite forwards `/api` to Express on `127.0.0.1:5000`. The Vite proxy target needs to match any alternate Express port.
+The backend runs at `http://localhost:5000`.
+
+### 4. Frontend setup
+
+Open a new terminal from the project root:
+
+```bash
+cd client
+npm install
+npm run dev
+```
+
+### 5. Open the application
+
+Visit [http://localhost:5173](http://localhost:5173).
+
+Log in using the administrator email and password configured during database seeding.
+
+**Note:** Windows PowerShell users can use `npm.cmd` instead of `npm` if script execution is restricted. Never commit your `.env` file or actual credentials.
 
 ## Environment variables
 
