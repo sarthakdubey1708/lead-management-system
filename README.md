@@ -1,61 +1,192 @@
 # BizLeap Lead Management System
 
-The API implements administrator authentication, lead CRUD, list search and filters, pagination, dashboard totals, and a 30-day UTC trend. Requests and responses follow [API contract v1.0](docs/api-contract.md).
+BizLeap is a Mini CRM for tracking prospective customers from first contact through conversion. One administrator can manage lead records, find prospects that need attention and see how the pipeline and acquisition sources are performing.
 
-## Requirements
+## Features
 
-Use Node.js 22.13+ or 24 LTS, PowerShell, and a running MongoDB server. The default ports are 27017 for MongoDB, 5000 for Express, and 5173 for Vite.
+- Administrator sign-in, sign-out and protected dashboard and lead pages.
+- Add, view, edit and delete leads. Change a lead’s status directly from the list.
+- Search by name, email, phone or company. Filter by status and source, with server-side pagination.
+- Dashboard counts for total, new, contacted and converted leads, plus the status breakdown, 30-day activity and acquisition sources.
+- Responsive lead tables and mobile cards, keyboard-operable controls, and loading, empty and error states.
+- Input validation and field-level feedback. Edit and inline status changes check for a newer record before saving.
 
-## Backend
+## Technology stack
 
-From the repository root in a PowerShell terminal:
+| Layer | Technologies | Role |
+| --- | --- | --- |
+| Frontend | React 19, React Router 7, Vite 8 | Component-based UI, client routing and a development proxy for the API |
+| Design and charts | Tailwind CSS 3, IBM Plex Sans via Fontsource, Lucide React, Recharts 3 | Shared responsive styles, self-hosted fonts, icons and dashboard charts |
+| API | Node.js, Express 5 | REST routing, authentication and validation middleware, and consistent JSON responses |
+| Persistence | MongoDB, Mongoose 9 | Validated models, indexed lead ordering and database-side dashboard aggregation |
+| Security and testing | bcryptjs, jsonwebtoken, Helmet, express-rate-limit, Node.js test runner, ESLint | Password hashing, signed sessions, HTTP protections, regression tests and linting |
+
+## Prerequisites
+
+- Node.js 24 LTS recommended. The API declares Node.js `^20.19.0 || >=22.12.0`. For the full workflow including ESLint, use Node.js 20.19+ in the 20.x series, 22.13+ in the 22.x series, or 24+. Verified with Node.js 24.18.1 and npm 11.16.0. Use the npm bundled with the recommended Node.js version. The project does not declare a separate npm engine range.
+- A running MongoDB instance accessible to the API. The setup below uses `127.0.0.1:27017` and was verified with MongoDB 8.3.4. The API also accepts `mongodb+srv://` connection strings.
+- Git and a terminal. The examples use Windows PowerShell. On a shell without the Windows script shim, use `npm` in place of `npm.cmd`.
+
+## Local installation
+
+Clone the repository using its GitHub clone URL and install the locked dependencies in both packages.
 
 ```powershell
-Set-Location server
-npm.cmd install
+$repositoryUrl = Read-Host 'Enter the GitHub clone URL'
+git clone $repositoryUrl bizleap-mini-crm
+Set-Location bizleap-mini-crm
+$projectRoot = (Get-Location).Path
+
+Set-Location (Join-Path $projectRoot 'server')
+npm.cmd ci
+Set-Location (Join-Path $projectRoot 'client')
+npm.cmd ci
+
+Set-Location (Join-Path $projectRoot 'server')
 if (-not (Test-Path -LiteralPath .env)) {
     Copy-Item -LiteralPath .env.example -Destination .env
 }
 node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
 ```
 
-Put the generated value in the local `server/.env` as `JWT_SECRET`. Add `ADMIN_NAME`, `ADMIN_EMAIL`, and `ADMIN_PASSWORD` to that file and choose your own credentials. The password needs at least 12 characters and at most 72 UTF-8 bytes. Use quotes in `.env` if the password intentionally contains surrounding spaces or a `#`. Set `MONGODB_URI` for your local database. Keep `server/.env` private.
+Open `server/.env` in your editor. Paste the generated 64-character hex value into `JWT_SECRET` and set `MONGODB_URI` for your MongoDB instance. Choose your own `ADMIN_NAME`, `ADMIN_EMAIL` and `ADMIN_PASSWORD`. The password needs at least 12 characters and at most 72 UTF-8 bytes. Quote the value if it contains a `#` or intentional leading or trailing spaces. Keep this file and the generated values private. The frontend uses a relative `/api` URL and needs no `.env` file for local setup.
+
+With MongoDB running, seed the administrator and 40 fictional leads, then start Express in the `server` terminal.
 
 ```powershell
 npm.cmd run seed
 npm.cmd run dev
 ```
 
-The seed creates one administrator and 40 fictional leads on an empty database. Rerunning it preserves the existing administrator and edits to sample leads. Use the credentials supplied during the first successful seed to sign in. Changing the seed variables later does not rotate the stored administrator credentials. The seed variables are required for `npm.cmd run seed` only. Express needs `JWT_SECRET` at startup.
-
-## Frontend
-
-From the repository root in a second PowerShell terminal:
+Open a second PowerShell terminal at the repository root and start Vite.
 
 ```powershell
 Set-Location client
-npm.cmd install
 npm.cmd run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Vite forwards relative `/api` requests to Express. The browser sends the HTTP-only session cookie with same-origin requests. Login, logout, and lead writes require an exact `APP_ORIGIN` match or a same-origin Referer when the Origin header is absent. Use the origin configured in `APP_ORIGIN` when opening the frontend.
+Open [http://localhost:5173](http://localhost:5173) and sign in with the email and password used in the first successful seed. Use this exact browser origin with the default `APP_ORIGIN`. Vite forwards `/api` to Express on `127.0.0.1:5000`. The Vite proxy target needs to match any alternate Express port.
 
-## Sessions and HTTPS
+## Environment variables
 
-Sessions expire after eight hours. Logout clears the browser cookie. An existing copy of a token stays valid until it expires while the administrator record retains its admin role and the signing key stays the same. Login is limited to `LOGIN_RATE_LIMIT` attempts per IP every 15 minutes per API process, defaulting to 10.
+`server/.env.example` contains local defaults and placeholders. Server configuration may also be supplied through process environment variables.
 
-Express listens on `127.0.0.1`. For production, set `NODE_ENV=production` and `APP_ORIGIN` to the exact public HTTPS origin. The same-host TLS reverse proxy must serve the frontend and forward `/api` from that origin to Express. Configure it to replace incoming `X-Forwarded-For`, `X-Forwarded-Host`, and `X-Forwarded-Proto` with trusted request values. The login limiter uses the forwarded client IP in this setup.
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `MONGODB_URI` | API, seed and date refresh | MongoDB connection string with `mongodb://` or `mongodb+srv://` scheme |
+| `JWT_SECRET` | API and seed | Random 64-character hex signing key |
+| `PORT` | Optional | Loopback API port, defaults to `5000` |
+| `NODE_ENV` | Optional | `development` by default. Set `production` for production proxy behavior |
+| `APP_ORIGIN` | Required in production | Exact browser origin with no trailing slash. Defaults to `http://localhost:5173` in development. Production requires HTTPS |
+| `LOGIN_RATE_LIMIT` | Optional | Maximum login requests per IP per 15-minute window, defaults to `10` |
+| `ADMIN_NAME` | Seed only | Display name of the initial administrator |
+| `ADMIN_EMAIL` | Seed only | Email address used to sign in |
+| `ADMIN_PASSWORD` | Seed only | Private password for the initial administrator |
+| `MONGODB_TEST_URI` | Optional, backend tests only | Set in the test process environment to override `mongodb://127.0.0.1:27017` |
 
-## Checks
+The retained `client/.env.example` documents `/api` as `VITE_API_BASE_URL`. The application uses `/api` directly, so changing that variable has no effect. Vite environment variables are public.
 
-From the repository root in PowerShell:
+## Sample dataset
+
+On an empty database, the seed creates 40 fictional leads with these statuses. Creation dates follow a fixed, uneven schedule anchored to the UTC seed date.
+
+| New | Contacted | Interested | Converted | Lost |
+| ---: | ---: | ---: | ---: | ---: |
+| 12 | 10 | 8 | 6 | 4 |
+
+The seed inserts missing fixture IDs and preserves edits on existing records. It keeps the existing administrator, so changing seed credentials later does not rotate that account. Dashboard figures and charts come from MongoDB. The activity chart includes zero-count days in its 30-day UTC window.
+
+To move existing sample dates into the current reporting window, start with a preview in `server`.
 
 ```powershell
-Set-Location server
+$sampleDate = [DateTime]::UtcNow.ToString('yyyy-MM-dd')
+node .\seeds\refresh-sample-dates.js --date $sampleDate
+```
+
+Check the database name and planned record count. When they match the intended update, apply and verify using the same UTC date.
+
+```powershell
+node .\seeds\refresh-sample-dates.js --date $sampleDate --apply
+node .\seeds\refresh-sample-dates.js --date $sampleDate
+```
+
+The refresh targets existing records with the original fixture IDs and changes only `createdAt`. It skips missing IDs and preserves all other fields, including `updatedAt`. The last preview should report zero planned changes.
+
+## API overview
+
+| Method | Endpoint | Purpose | Admin session |
+| --- | --- | --- | --- |
+| `POST` | `/api/auth/login` | Verify credentials and set the session cookie | No |
+| `GET` | `/api/auth/me` | Read the current administrator | Yes |
+| `POST` | `/api/auth/logout` | Clear the session cookie | No |
+| `GET` | `/api/leads` | Search, filter and paginate leads | Yes |
+| `POST` | `/api/leads` | Create a lead | Yes |
+| `GET` | `/api/leads/:id` | Read one lead | Yes |
+| `PUT` | `/api/leads/:id` | Replace the six writable fields, including status | Yes |
+| `DELETE` | `/api/leads/:id` | Delete a lead | Yes |
+| `GET` | `/api/dashboard/summary` | Read status totals, source counts and 30 daily counts | Yes |
+
+See the [API contract](docs/api-contract.md) for request and response shapes, validation rules and error codes.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    UI[React pages and session state] --> API[Fetch service · relative /api]
+    API --> PROXY[Vite proxy · development]
+    PROXY --> ROUTES[Express routes]
+    ROUTES --> MIDDLEWARE[Auth, origin and input checks]
+    MIDDLEWARE --> CONTROLLERS[Controllers]
+    CONTROLLERS --> MODELS[Mongoose models]
+    MODELS --> DB[(MongoDB)]
+```
+
+- **Session lifecycle.** React checks `/api/auth/me` on startup before rendering protected routes. Express verifies the cookie and the current administrator role. A protected request that returns `401` clears the frontend session.
+- **Lead lifecycle.** The client calls Express with same-origin requests. Routes apply the relevant checks before controllers query or mutate MongoDB. Successful mutations refresh the lead list and dashboard summary. The `leads` collection stores name, email, phone, company, source, status and timestamps. The `users` collection stores the administrator with a password hash. All leads are shared within the single administrator workspace and have no owner reference.
+- **Dashboard and errors.** A MongoDB aggregation computes pipeline and acquisition counts and groups recent leads by UTC creation day. The controller fills missing days with zero. API errors follow a shared JSON format, which the UI uses to show field errors or request feedback.
+
+See the [design system](DESIGN.md) for UI tokens, breakpoints and keyboard behavior.
+
+## Authentication and security
+
+Administrator passwords are hashed with bcryptjs at cost 12. A successful login issues an HS256 JWT that expires after eight hours. The browser stores it in an HTTP-only, `SameSite=Strict` cookie scoped to `/api`. The cookie uses `Secure` when the origin uses HTTPS. Protected endpoints verify the signature, expiry and current administrator role.
+
+Express rate-limits login by IP, checks the exact configured `Origin` for write requests, and falls back to an exact-origin `Referer` when `Origin` is absent. It validates request bodies, IDs and query parameters and applies Helmet security headers. Credentials and signing keys are supplied through the server environment.
+
+## Testing
+
+Run the frontend checks from `client`.
+
+```powershell
+npm.cmd run lint
+node --test test/update-current-lead.test.js
+npm.cmd run build
+```
+
+Run the backend checks from `server` with MongoDB running.
+
+```powershell
 npm.cmd run lint
 npm.cmd test
 ```
 
-The integration suite signs in with a generated test administrator in an isolated, randomly named MongoDB database. It pings MongoDB before the API checks and drops the test database afterward. By default it uses `mongodb://127.0.0.1:27017`. Set `$env:MONGODB_TEST_URI` if you use a different MongoDB server for tests. The connection needs permission to create and drop the temporary database.
+The frontend regression suite covers a lead edited after the list was loaded, retry behavior and failed detail requests. The backend suite creates a randomly named MongoDB database and a disposable administrator, then drops that test database. Its connection needs permission to create and drop the test database. For a different test server, set `$env:MONGODB_TEST_URI` in the terminal before running the suite.
 
-To check the frontend scaffold, run `npm.cmd run build` and `npm.cmd run lint` from `client/`.
+## Screenshots
+
+Captured in the running application using fictional leads and a disposable demonstration administrator.
+
+![Desktop dashboard showing pipeline counts, lead activity and sources](docs/screenshots/desktop-dashboard.png)
+
+| Desktop (1440 px) | Mobile (390 px) |
+| --- | --- |
+| [Login](docs/screenshots/desktop-login.png) | [Dashboard](docs/screenshots/mobile-dashboard.png) |
+| [Leads table](docs/screenshots/desktop-leads.png) | [Lead cards](docs/screenshots/mobile-leads.png) |
+| [Add Lead dialog](docs/screenshots/add-lead-dialog.png) | |
+
+## Scope and limitations
+
+- The app supports one administrator. It has no public registration or per-lead ownership.
+- Logout clears the current browser’s cookie. A copied token can remain valid until its eight-hour expiration while the signing key and administrator role are unchanged.
+- Stale edits are detected by comparing the record displayed in the UI with a fresh detail response before sending the full `PUT`. An update arriving between that check and the write can still race.
+- Local development uses Vite and the loopback API. A production deployment needs an HTTPS reverse proxy on the API host to serve `client/dist`, handle client route fallback and route `/api` to Express. Set `NODE_ENV=production`, configure the exact public `APP_ORIGIN`, and have the proxy replace incoming forwarded client IP, host and protocol headers with trusted values. This repository documents local setup.

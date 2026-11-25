@@ -10,7 +10,8 @@ import { LEAD_SOURCES, LEAD_STATUSES } from '../constants/leads.js'
 import { Lead } from '../models/lead.js'
 import { User } from '../models/user.js'
 import { seedAdmin } from '../seeds/admin.js'
-import { seedSampleLeads } from '../seeds/sample-leads.js'
+import { buildSampleLeads } from '../seeds/fixtures.js'
+import { refreshSampleLeadDates, seedSampleLeads } from '../seeds/sample-leads.js'
 import { addUtcDays, utcDateLabel, utcDay } from '../utils/utc-dates.js'
 
 const origin = 'http://localhost:5173'
@@ -226,7 +227,11 @@ test('the seed is idempotent and list search, filters and pagination work agains
   assert.equal(summary.data.totalLeads, 40)
   assert.deepEqual(summary.data.byStatus.map(({ count }) => count), [12, 10, 8, 6, 4])
   assert.deepEqual(summary.data.bySource.map(({ count }) => count), [7, 7, 7, 7, 6, 6])
-  assert.equal(summary.data.leadsOverTime.length, 30)
+  const expected = buildSampleLeads(seedDate)
+  assert.deepEqual(summary.data.leadsOverTime, Array.from({ length: 30 }, (_, index) => {
+    const date = utcDateLabel(addUtcDays(utcDay(seedDate), index - 29))
+    return { date, count: expected.filter((lead) => utcDateLabel(lead.createdAt) === date).length }
+  }))
   assert.equal(summary.data.leadsOverTime.reduce((sum, { count }) => sum + count, 0), 40)
 
   await Lead.collection.updateOne({ _id: saved._id }, {
@@ -235,6 +240,35 @@ test('the seed is idempotent and list search, filters and pagination work agains
   const { body: historical } = await request('/dashboard/summary')
   assert.equal(historical.data.totalLeads, 40)
   assert.equal(historical.data.leadsOverTime.reduce((sum, { count }) => sum + count, 0), 39)
+})
+
+test('sample date refresh previews changes and updates only existing original IDs, preserving edits', async () => {
+  const reference = new Date()
+  const originals = buildSampleLeads(reference)
+  const [first, second] = originals
+  await seedSampleLeads(reference)
+  await Lead.updateOne({ _id: first._id }, { $set: { companyName: 'Date refresh edit', leadStatus: 'Interested' } })
+  await Lead.collection.updateOne({ _id: new Lead.base.Types.ObjectId(first._id) }, {
+    $set: { createdAt: addUtcDays(utcDay(reference), -30) },
+  })
+  const edited = await Lead.findById(first._id).lean()
+  const manual = await Lead.create(newLead)
+  const unrelated = await Lead.findById(manual._id).lean()
+  await Lead.deleteOne({ _id: second._id })
+  const preview = await refreshSampleLeadDates(reference)
+  assert.equal(preview.existing, 39)
+  assert.equal(preview.missing, 1)
+  assert.ok(preview.planned > 0)
+  assert.equal(preview.modified, 0)
+  assert.deepEqual(await Lead.findById(first._id).lean(), edited)
+
+  const applied = await refreshSampleLeadDates(reference, { apply: true })
+  assert.equal(applied.modified, preview.planned)
+  assert.deepEqual(await Lead.findById(first._id).lean(), { ...edited, createdAt: first.createdAt })
+  assert.deepEqual(await Lead.findById(manual._id).lean(), unrelated)
+  assert.equal(await Lead.findById(second._id).lean(), null)
+  assert.equal(await Lead.countDocuments(), 40)
+  assert.deepEqual(await refreshSampleLeadDates(reference, { apply: true }), { existing: 39, missing: 1, planned: 0, modified: 0 })
 })
 
 test('login sets an 8-hour HTTP-only session cookie with no token or hash in the body', async () => {

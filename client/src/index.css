@@ -17,7 +17,10 @@
   body {
     @apply bg-canvas font-sans text-body text-fg antialiased;
     margin: 0;
-    overflow-x: hidden; /* safety net only; layouts must not rely on it */
+  }
+
+  svg.lucide {
+    stroke-width: 1.75;
   }
 
   /* One focus style for every interactive element. Never remove it. */
@@ -49,6 +52,130 @@
 }
 
 @layer components {
+  :root {
+    --chart-brand: theme('colors.brand.600');
+    --chart-tint: theme('colors.brand.50');
+    --chart-text: theme('colors.fg.3');
+    --chart-track: theme('colors.surface.muted');
+    --chart-dark-grid: theme('colors.navy.800');
+    --chart-dark-text: theme('colors.navy.200');
+    --chart-aqua: theme('colors.brand.200');
+    --chart-teal: theme('colors.brand.400');
+    --accent-indigo: theme('colors.accent.indigo');
+    --accent-blue: theme('colors.accent.blue');
+    --accent-violet: theme('colors.accent.violet');
+    --accent-emerald: theme('colors.accent.emerald');
+    --accent-amber: theme('colors.accent.amber');
+    --accent-coral: theme('colors.accent.coral');
+  }
+
+  .nav-surface {
+    @apply bg-gradient-to-b from-navy-950 to-navy-900 text-navy-100;
+  }
+
+  .brand-surface {
+    background: linear-gradient(115deg, theme('colors.navy.950'), theme('colors.navy.850') 48%, theme('colors.brand.800'));
+    @apply text-white;
+  }
+
+  .inverse-focus :focus-visible {
+    outline-color: theme('colors.brand.200');
+  }
+
+  .dashboard-banner {
+    @apply grid gap-4 rounded-hero p-4 shadow-card md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] md:items-center md:gap-6 md:p-6;
+  }
+
+  .desk-panel {
+    @apply rounded-card border border-line bg-surface shadow-card;
+  }
+
+  .dashboard-charts {
+    @apply grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)];
+  }
+
+  .dashboard-chart-plot {
+    @apply mt-4 h-48 min-w-0 md:h-56;
+  }
+
+  @screen md {
+    .lead-workspace {
+      @apply rounded-card border border-line bg-surface shadow-card;
+    }
+  }
+
+  .lead-table-frame {
+    container: lead-table / inline-size;
+  }
+
+  .lead-table {
+    --cell-gutter: theme('spacing.2');
+  }
+
+  .lead-cell {
+    @apply py-3 align-middle;
+    padding-inline: var(--cell-gutter);
+  }
+
+  .lead-phone-column { width: 8.5rem; }
+  .lead-date-column { width: 6.5rem; }
+
+  @screen lg {
+    .lead-cell { padding-block: theme('spacing.2'); }
+    .lead-company-column { width: 15%; }
+    .login-form input { min-height: theme('spacing.12'); }
+  }
+
+  @container lead-table (min-width: 48rem) {
+    .lead-table { --cell-gutter: theme('spacing.4'); }
+    .lead-phone-column { width: 9.5rem; }
+    .lead-date-column { width: 7.5rem; }
+  }
+
+  @container lead-table (min-width: 60rem) {
+    .lead-company-column { width: 21%; }
+    .lead-phone-column { width: 10rem; }
+    .lead-date-column { width: 8rem; }
+    .lead-table { @apply text-h3 font-normal; }
+  }
+
+  @screen lg {
+    .chart-axis-label { font-size: theme('fontSize.badge.0'); }
+  }
+
+  .rail-link > span {
+    display: flex;
+    width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .rail-link > span > span[aria-hidden='true'] {
+      display: none;
+    }
+  }
+
+  .login-brand {
+    padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  }
+
+  .login-form {
+    padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  @screen lg {
+    .login-brand {
+      padding-top: max(3rem, env(safe-area-inset-top, 0px));
+    }
+  }
+
+  .sheet-header {
+    padding-top: calc(.75rem + env(safe-area-inset-top, 0px));
+  }
+
+  @media (min-width: 768px) {
+    .sheet-header { padding-top: .75rem; }
+  }
+
   /* ---- Safe areas (notch / home indicator). Requires viewport-fit=cover in index.html ---- */
 
   /* Mobile top bar: sits below the status bar / notch. */

@@ -1,11 +1,12 @@
-# DESIGN.md — BizLeap Lead Management System (v1.0)
+# DESIGN.md — BizLeap Lead Management System (v2.0)
 
-**Direction: "Pipeline Desk."** A calm, data-first, border-led CRM workspace with one brand color
-and a segmented pipeline strip as its signature element.
+**Direction: "Pipeline Desk."** Deep navy frames the workspace. Deep teal guides actions and marks
+the 30-day lead activity. Cool, light content surfaces separate the tools from the charts and
+full-color KPI cards. The segmented pipeline is the first read on the Dashboard and the shared
+visual reference for the split-screen login.
 
-This file is the single source of truth for the frontend design. Tokens are implemented in
-`client/tailwind.config.js` and global behavior in `client/src/index.css`. If a component, skill
-or habit conflicts with this file, this file wins; change this file first, then the code.
+This reference describes the frontend design system. Design tokens live in
+`client/tailwind.config.js` and global styles live in `client/src/index.css`.
 
 ---
 
@@ -15,24 +16,39 @@ All colors are Tailwind tokens. Do not write hex values or invent local colors i
 
 | Role | Token (class suffix) | Hex | Use |
 |---|---|---|---|
-| Primary | `brand-600` | #0E5A5F | Primary buttons, links, focus ring, chart brand color |
-| Primary hover/pressed | `brand-700` | #0A4A4E | Hover and active state of primary |
-| Primary tint | `brand-50` | #E3F1F1 | Active nav item, selected row/option |
-| Secondary (ink) | `ink-800` | #1F2D3A | Headings, tooltip background |
-| App background | `canvas` | #F6F5F1 | Page background |
-| Surface | `surface` | #FFFFFF | Cards, table, modals, inputs, nav |
-| Surface muted | `surface-muted` | #F0EEE8 | Table header |
-| Surface hover | `surface-hover` | #FAF9F6 | Table row hover |
-| Text primary | `fg` | #1A2430 | Body and data |
-| Text secondary | `fg-2` | #4B5663 | Table headers, labels, helper text |
-| Text muted | `fg-3` | #5F6875 | Captions, placeholders, metadata |
-| Divider | `line` | #E4E2DA | Card borders, row dividers (decorative) |
-| Divider strong | `line-strong` | #CFCCC1 | Emphasized dividers, hover borders (decorative) |
-| Input border | `line-input` | #8C8A80 | Input/select/checkbox boundary (must be >= 3:1) |
+| Primary | `brand-600` | #0C6566 | Primary buttons, links, focus on light surfaces |
+| Primary hover/pressed | `brand-700` | #094F53 | Hover and active state of primary |
+| Primary tint | `brand-50` | #E4F5F1 | Selected options and light branded surfaces |
+| Highlight | `brand-200` / `brand-400` | #A5ECDD / #58C9B9 | Dark-surface focus, actions and activity bars |
+| Deep teal | `brand-800` | #103E4B | Branded gradient and active navigation |
+| Navy | `navy-950` / `900` / `850` / `800` | #10182C / #17213A / #1D2A47 / #263653 | Navigation, banner, dark chart and guides |
+| Light navy | `navy-100` / `navy-200` | #E1E8F6 / #C1CEE5 | Text and metadata on dark surfaces |
+| Secondary (ink) | `ink-800` | #142038 | Headings, tooltip background |
+| App background | `canvas` | #F2F4F9 | Page background |
+| Surface | `surface` | #FFFFFF | Cards, table, modals, inputs |
+| Surface muted | `surface-muted` | #EAF0F8 | Table header and chart tracks |
+| Surface hover | `surface-hover` | #F6F8FC | Table row hover and form fills |
+| Text primary | `fg` | #1C2841 | Body and data |
+| Text secondary | `fg-2` | #45536B | Table headers, labels, helper text |
+| Text muted | `fg-3` | #566580 | Captions, placeholders, metadata |
+| Divider | `line` | #DDE4EF | Card borders, row dividers |
+| Divider strong | `line-strong` | #C7D2E2 | Emphasized dividers |
+| Input border | `line-input` | #808DA2 | Input/select/checkbox boundary |
 | Success | `success` / `success-bg` | #166534 / #E3F4E8 | Success toast, confirmations |
 | Warning | `warning` / `warning-bg` | #92400E / #FEF3C7 | Warnings |
 | Error | `error` / `error-bg` | #B42318 / #FDECEA | Validation errors, danger button, error toast |
 | Info | `info` / `info-bg` | #1D4ED8 / #E8EEFB | Informational notices |
+
+### Dashboard accent colors
+
+| Token | Hex | Use |
+|---|---|---|
+| `accent-indigo` / `accent-indigo-bg` | #5252A3 / #E6E5FB | Total leads, Website, neutral empty states |
+| `accent-blue` / `accent-blue-bg` | #2369A7 / #DFEBFD | Instagram and New KPI |
+| `accent-violet` | #7842AE | LinkedIn |
+| `accent-emerald` / `accent-emerald-deep` / `accent-emerald-bg` | #17634A / #103F36 / #CFF1E3 | Referral and Converted KPI |
+| `accent-amber` / `accent-amber-bg` | #94600D / #FAEDD2 | Advertisement and Contacted KPI |
+| `accent-coral` | #B74551 | Cold Calling |
 
 ### Lead status colors (used ONLY for lead status)
 
@@ -49,7 +65,7 @@ Rules:
 - Tailwind cannot see dynamically built class names. Keep a static map in `utils/constants.js`
   (for example `New: 'bg-status-new-bg text-status-new-fg'`) and never build `` `text-status-${x}-fg` ``.
 - Brand teal is never used to mean a status. Converted is green, not teal.
-- Source chart (Website, Instagram, ...) uses a single `brand-600` color, because sources are not statuses.
+- Acquisition sources use the separate accent palette alongside visible names and counts.
 
 ---
 
@@ -59,27 +75,24 @@ Targets: text >= 4.5:1, UI boundaries, focus indicators and meaningful graphics 
 
 | Pair | Ratio | Target | Result |
 |---|---|---|---|
-| `fg` on surface / canvas | 15.68 / 14.38 | 4.5 | Pass |
-| `fg-2` on surface / canvas | 7.47 / 6.85 | 4.5 | Pass |
-| `fg-3` on surface / canvas | 5.64 / 5.17 | 4.5 | Pass |
-| `fg-2` / `fg-3` on table header (`surface-muted`) | 6.44 / 4.86 | 4.5 | Pass |
-| `fg` on row hover | 14.90 | 4.5 | Pass |
-| White on primary button / hover | 7.94 / 9.99 | 4.5 | Pass |
+| `fg` on surface / canvas | 14.69 / 13.35 | 4.5 | Pass |
+| `fg-2` on surface | 7.77 | 4.5 | Pass |
+| `fg-3` on surface / muted / hover | 5.88 / 5.13 / 5.53 | 4.5 | Pass |
+| White on primary button / hover | 6.84 / 9.31 | 4.5 | Pass |
 | White on danger button | 6.57 | 4.5 | Pass |
-| `brand-600` text on surface / on `brand-50` | 7.94 / 6.85 | 4.5 | Pass |
-| White on tooltip (`ink-800`) | 14.05 | 4.5 | Pass |
+| `brand-600` on surface / `brand-50` / canvas | 6.84 / 6.07 / 6.22 | 4.5 | Pass |
+| `navy-200` on `brand-800` | 7.30 | 4.5 | Pass |
+| `brand-200` focus on `brand-800` | 8.63 | 3.0 | Pass |
+| White on `ink-800` / emerald / deep emerald | 16.24 / 7.19 / 11.76 | 4.5 | Pass |
 | Badge label on fill: New / Contacted / Interested / Converted / Lost | 5.76 / 5.27 / 5.72 / 6.24 / 6.83 | 4.5 | Pass |
 | Status dot on surface: New / Contacted / Interested / Converted / Lost | 4.63 / 3.59 / 4.57 / 3.38 / 4.49 | 3.0 | Pass |
-| Status dot on canvas (pipeline strip) | 4.24 / 3.29 / 4.19 / 3.10 / 4.11 | 3.0 | Pass |
+| Status dot on `navy-950` (pipeline strip) | 3.81 / 4.92 / 3.87 / 5.23 / 3.94 | 3.0 | Pass |
 | Success / Warning / Error / Info text on own tint | 6.24 / 6.37 / 5.75 / 5.76 | 4.5 | Pass |
 | Success / Warning / Error / Info text on surface | 7.13 / 7.09 / 6.57 / 6.70 | 4.5 | Pass |
-| Input border `line-input` on surface | 3.46 | 3.0 | Pass |
+| Input border `line-input` on `surface-hover` | 3.16 | 3.0 | Pass |
 | Error input border on surface | 6.57 | 3.0 | Pass |
-| Focus ring `brand-600` on surface / canvas / `brand-50` | 7.94 / 7.27 / 6.85 | 3.0 | Pass |
-| Placeholder (`fg-3`) on surface | 5.64 | 4.5 | Pass |
 
-Ratios were calculated with the WCAG relative-luminance formula. They confirm the palette on paper;
-real rendering (browser, monitor, dark mode) is checked in Stage 5.
+Ratios were calculated with the WCAG relative-luminance formula for the listed colors.
 `line` and `line-strong` are decorative dividers, not required to meet 3:1. Never use them for input boundaries.
 Disabled controls are exempt from contrast rules but must remain legible (50% opacity, `fg-3` text).
 
@@ -92,14 +105,15 @@ Numbers in tables, KPIs and pagination use `tabular-nums`.
 
 | Role | Class | Size / line height | Weight |
 |---|---|---|---|
-| Page title (one `h1` per page) | `text-h1` | 24 / 32 | 600 |
-| Section title (`h2`) | `text-h2` | 18 / 26 | 600 |
+| Page title (one `h1` per page) | `text-h1` / `text-h1-wide` | 28 / 34, 36 / 42 | 600 |
+| Split-screen login heading | `text-display` | 40–60, 1.04 line height | 600 |
+| Section title (`h2`) | `text-h2` | 20 / 28 | 600 |
 | Card title (`h3`) | `text-h3` | 15 / 22 | 600 |
 | Body, table cells, inputs (desktop) | `text-body` | 14 / 22 | 400 |
 | Inputs on mobile (prevents iOS zoom) | `text-body-lg` | 16 / 24 | 400 |
 | Status badge label | `text-badge` | 13 / 16 | 500 |
 | Labels, captions, helper text | `text-caption` | 12 / 16 | 500 |
-| KPI number | `text-kpi` | 32 / 36 | 600 |
+| KPI number | `text-kpi` / `text-kpi-wide` | 34 / 36, 44 / 44 | 600 |
 
 Rules: sentence case everywhere, no all-caps micro labels. Nothing important (names, status, dates,
 errors) is below 13px. Captions (12px) are for helper text and metadata only. Line length in forms and
@@ -114,13 +128,14 @@ Avoid odd values like `p-7` or `gap-[13px]`.
 
 | Item | Value |
 |---|---|
-| Page padding | 32 desktop, 24 tablet, 16 mobile |
+| Page padding | 24 desktop and tablet, 16 mobile |
 | Card padding | 20 (16 on mobile) |
 | Grid gap | 16; 24 between major sections |
 | Page header (title + primary action) to content | 24 |
-| Table row height | 52, cell padding 12 x 16 |
+| Table row height | 52 minimum, desktop cell padding 8 x 16 (8 x 8 in narrow table containers). Tablet uses 12px vertical padding. |
 | Form: field gap / label to input | 16 / 6 |
-| Page content max width | 1200 (`max-w-content`), centered |
+| Page content max width | 1664 (`max-w-content`), aligned to the sidebar with a 24px inset |
+| Login form max width | 432 (`max-w-login`) |
 
 ### Layout chrome
 
@@ -149,13 +164,16 @@ Without `viewport-fit=cover`, the `env(safe-area-inset-*)` values are zero.
 
 | Token | Value | Use |
 |---|---|---|
-| `rounded-control` | 6px | Buttons, inputs, selects |
-| `rounded-card` | 8px | Cards, table container, menus, toasts |
-| `rounded-modal` | 12px | Dialogs and sheets (top corners only on mobile sheet) |
+| `rounded-control` | 8px | Buttons, inputs, selects |
+| `rounded-card` | 14px | Cards, table container, menus, toasts |
+| `rounded-modal` | 16px | Dialogs and sheets (top corners only on mobile sheet) |
+| `rounded-hero` | 20px | Branded page banners |
 | `rounded-full` | pill | Status badges, avatars |
+| `shadow-card` | 0 1px 2px rgba(16,24,44,.045), 0 6px 16px rgba(16,24,44,.035) | Bordered panels |
+| `shadow-control` | 0 1px 2px rgba(26,36,48,.16) | Solid action buttons |
 | `shadow-pop` | 0 8px 24px rgba(26,36,48,.12) | Menus, dialogs, toasts only |
 
-Surfaces use a 1px `border-line` instead of shadow. No cards inside cards.
+Panels use a 1px `border-line` and a shallow shadow. Reserve stronger elevation for floating layers.
 Icons: **Lucide React only**. 16px inline with text, 20px in nav and buttons, stroke 1.75.
 Icon-only controls always have an accessible name (`aria-label`).
 
@@ -171,6 +189,7 @@ Min height: 40 desktop (`min-h-control`), 44 mobile (`min-h-touch`). Padding 16 
 | Variant | Default | Hover | Pressed | Use |
 |---|---|---|---|---|
 | Primary | `brand-600`, white text | `brand-700` | `brand-700` + scale .98 | One per view (Add lead, Save, Log in) |
+| On dark | `brand-200`, navy text | `brand-50` | scale .98 | Primary action in a dark banner |
 | Secondary | surface, `line-input` border, `fg` text | `surface-hover` | scale .98 | Cancel, Clear filters |
 | Danger | `error`, white text | darker 8% | scale .98 | Delete confirm only |
 | Ghost / icon | transparent, `fg-2` | `surface-muted` | scale .98 | Row actions (min 44x44 hit area on touch) |
@@ -186,16 +205,26 @@ with an alert icon, linked by `aria-describedby`, field gets `aria-invalid="true
 Server `fields` errors from the API map onto the same field messages. Values are preserved when a request fails.
 
 ### Cards
-Surface, 1px `line` border, `rounded-card`, 20px padding. KPI card: label (`text-caption fg-2`), number
-(`text-kpi`), supporting text (`text-caption fg-3`). Never decorative gradients.
+The dashboard starts with its title and a lead-list link on the left and the pipeline distribution
+on the right. KPI cards below have indigo, blue, amber, and emerald surfaces, with the conversion
+rate attached to the Converted metric. The dark daily activity chart anchors the charts row.
+
+### Login
+
+Desktop uses a full-height split layout with a navy-to-teal brand panel, a diagram of the five lead
+statuses, and a light sign-in panel. At smaller widths, the brand reduces to a compact header above
+the form.
 
 ### Table (Leads)
-Container: card with `overflow-x: auto` only as a last resort (should not trigger at 768+).
+The Leads banner places the result count beside the primary action. Filters, table, and pagination
+share one white work surface at tablet widths and larger. Mobile cards group the identity and
+status at the top, then show the contact details and actions.
 Header: `surface-muted`, `text-caption fg-2`. Rows: 1px `line` divider, hover `surface-hover`.
 Semantic `<table>`, `<th scope="col">`, visually hidden `<caption>`.
 Row actions (Edit, Delete) are **always visible**, never hover-revealed.
-Responsive: desktop shows all seven columns; tablet folds Phone and Created into a second line under the lead name;
-mobile renders each lead as a stacked card with the same actions.
+Responsive: desktop shows all seven columns. Phone and Created stay on single lines, with a text
+ellipsis and full-value title for unusually long phone formatting. Tablet moves both fields below
+the lead identity. Mobile renders each lead as a stacked card with the same actions.
 Pagination: "Showing 11-20 of 40", Previous / Next plus page numbers; `nav aria-label="Pagination"`,
 `aria-current="page"` on the current page.
 
@@ -206,12 +235,14 @@ Pagination: "Showing 11-20 of 40", Previous / Next plus page numbers; `nav aria-
 See section 7. Visually a badge with a chevron.
 
 ### Navigation
-Active item: `brand-50` background, `brand-600` text and icon, 2px left bar on the sidebar (top bar on mobile tab),
-`aria-current="page"`. Inactive: `fg-2`. Icon-only rail items have tooltips plus `aria-label`.
+Navy navigation frames the workspace across breakpoints. Active items use a teal surface and a
+`brand-200` marker with `aria-current="page"`. Inactive labels use `navy-200`. Icon-only rail items
+have tooltips and accessible names.
 
 ### Modal and sheet
 Desktop: centered, `max-w-modal`, `rounded-modal`, backdrop `ink-800` at 40%.
 Mobile: full-screen sheet with a sticky header (title, close) and sticky footer (Cancel, Save).
+The form sheet footer gives Cancel and Save equal widths on mobile.
 Delete confirmation is a small centered dialog on every size.
 
 ### Dropdown / menu
@@ -237,7 +268,8 @@ Used only for icon-only controls; never carries essential information.
 
 ### Global
 - First focusable element is a **Skip to main content** link (visible on focus).
-- Exactly one `h1` per page; on route change focus moves to the page `h1` (`tabIndex={-1}`).
+- Each page has one `h1`. The heading receives focus on in-app page transitions. Initial loads
+  follow normal tab order.
 - Landmarks: `nav`, `main`, labelled regions. Focus ring is never removed; ring uses 2px offset.
 - Tab order follows visual order: nav, page header action, filters, table/cards, pagination.
 - Touch targets: 44px minimum on mobile.
@@ -253,7 +285,7 @@ change the value immediately, which would fire a save request on every key press
 | Menu | `role="menu"` with five `role="menuitemradio"` items, `aria-checked` on the current one |
 | Move | ArrowUp / ArrowDown, Home / End, wraps no further than ends |
 | Choose | Enter or Space saves via full PUT, closes the menu, returns focus to the trigger |
-| Dismiss | Esc or Tab closes without saving, focus returns to the trigger; outside click also closes |
+| Dismiss | Escape returns focus to the trigger. Tab and Shift+Tab close the menu and continue normal focus traversal. Outside click also closes it. |
 | Pending | Trigger disabled with spinner, `aria-busy`; on success a toast "Status updated to {X}"; on failure the old status stays and an error toast shows |
 | Touch | Same menu, items 44px tall; no hover dependency |
 
@@ -277,6 +309,7 @@ Toasts announce through `aria-live`. Search results count changes are announced 
 
 ### Charts
 Each chart has a heading and a visually hidden data table or a text summary (counts per category).
+On the Lead Activity chart, focus the plot and press Left or Right to read exact daily counts.
 The pipeline strip has `role="img"` with an `aria-label` summarizing counts, plus a visible legend with numbers.
 
 ---
@@ -303,7 +336,7 @@ Modal: fade + 8px rise. Sheet: 16px rise. Toast: fade + 8px rise.
 
 | Target | Width | Page padding | KPI cards | Dashboard charts | Leads |
 |---|---|---|---|---|---|
-| Desktop | 1440 (1024+) | 32 | 4 in a row | Trend 2/3 + Sources 1/3 | Full table |
+| Desktop | 1440 (1024+) | 24 | 4 in a row | Trend 2/3 + Sources 1/3 | Full table |
 | Tablet | 768 (768-1023) | 24 | 2 x 2 | Stacked full width | Condensed table |
 | Mobile | 375 (<768) | 16 | 2 x 2 compact (or stacked) | Stacked | Cards |
 
@@ -314,24 +347,10 @@ and Status/Source filters sit on one row below.
 
 ## 10. Data visualization rules
 
-- Pipeline strip: five segments in status `dot` colors, proportional to counts, 2px surface gaps, labels and counts below. Zero-count statuses stay in the legend.
-- 30-day trend: single `brand-600` line, light `brand-50` area, no gradient. X axis uses the API's UTC `date` strings formatted without timezone conversion.
-- Sources: horizontal bars, `brand-600`, value labels at bar ends, API enum order.
-- Every chart: title, units ("leads"), tooltip, empty state when the total is 0.
+- Pipeline strip: five segments in status `dot` colors on navy, proportional to counts, 2px gaps, labels and counts below. Zero-count statuses stay in the legend.
+- 30-day activity: one teal column per UTC day with a zero baseline, a navy plot surface, integer count ticks, and an exact-date tooltip. Plot each daily count directly from the API.
+- Sources: horizontal bars in the acquisition accent palette, with visible names and a right-aligned count column outside the bar tracks. Keep API enum order.
+- Every chart: title, units ("leads"), a bordered surface tooltip with a color marker and exact count, and an empty state when the total is 0.
 - Conversion rate: `totalLeads ? convertedLeads / totalLeads * 100 : 0`, shown to one decimal place.
 
 ---
-
-## 11. Changes from the Stage 1 draft (and why)
-
-| # | Change | Reason |
-|---|---|---|
-| 1 | Input border `#CFCCC1` -> `line-input #8C8A80` | The Stage 1 border was 1.61:1 on white, below the 3:1 needed for a control boundary. |
-| 2 | Contacted dot `#D99A1B` -> `#B97A00` | 2.45:1 on white, failed 3:1 for the pipeline strip and badge dot. |
-| 3 | Added `surface-muted` and `surface-hover` tokens | Table header and row hover had no named token. |
-| 4 | Added `*-bg` tints for success, warning, error, info | Toasts and notices need an accessible fill. |
-| 5 | Badge text 12px -> 13px | Status is essential data and should not sit at caption size. |
-| 6 | Mobile touch height 40 -> 44; mobile input text 16px | Easier tapping, no iOS zoom on focus. |
-| 7 | Status control is a custom menu, not a native select | Prevents accidental saves on arrow keys (Windows), and is fully keyboard operable. |
-| 8 | Added mobile safe-area rules and `pb-above-nav` | Bottom nav must clear the home indicator and not hide content. |
-| 9 | No column sorting | The API contract fixes order to newest first; no sort parameter exists. |

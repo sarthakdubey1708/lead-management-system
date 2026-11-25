@@ -55,6 +55,24 @@ test('the fixture has 40 unique, stable IDs and the specified status distributio
   assert.deepEqual(counts, { New: 12, Contacted: 10, Interested: 8, Converted: 6, Lost: 4 })
 })
 
+test('sample lead activity has irregular UTC buckets, including quiet stretches and occasional peaks', () => {
+  const reference = new Date('2026-11-25T12:00:00Z')
+  function countsFor(day) {
+    const first = addUtcDays(utcDay(day), -29)
+    const counts = Array(30).fill(0)
+    for (const { createdAt } of buildSampleLeads(day)) {
+      counts[(createdAt - first) / 86_400_000] += 1
+    }
+    return counts
+  }
+  const counts = countsFor(reference)
+  assert.deepEqual(counts, countsFor(addUtcDays(reference, 75)))
+  assert.deepEqual([...new Set(counts)].sort(), [0, 1, 2, 3, 4])
+  assert.equal(counts.reduce((sum, value) => sum + value, 0), 40)
+  assert.equal(counts.filter((value) => value === 4).length, 2)
+  assert.ok(counts.some((value, index) => value === 0 && counts[index + 1] === 0))
+})
+
 test('list queries parse scalar filters and bounded pagination', () => {
   const parse = (query) => {
     const res = { locals: {} }

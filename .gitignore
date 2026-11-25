@@ -7,5 +7,18 @@ coverage/
 !.env.example
 
 *.log
+*.patch
+*.diff
 playwright-report/
 test-results/
+
+# Local development materials
+/.agents/
+/.claude/
+/.codex/
+/AGENTS.md
+/CODEX-FRONTEND-BUILD-PROMPT.md
+/CONTINUE-CODEX.md
+/README-CODEX-SETUP.md
+/client-scaffold/
+/docs/claude-api-handoff.md

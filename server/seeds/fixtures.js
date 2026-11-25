@@ -2,6 +2,9 @@ import { LEAD_SOURCES, LEAD_STATUSES } from '../constants/leads.js'
 import { addUtcDays, utcDay } from '../utils/utc-dates.js'
 
 const STATUS_COUNTS = [12, 10, 8, 6, 4]
+// Oldest to newest. Keep all 30 UTC buckets, including quiet stretches and two four-lead days.
+const DAILY_LEADS = [1, 0, 0, 2, 1, 3, 1, 0, 2, 0, 1, 4, 2, 1, 0, 0, 2, 3, 1, 2, 0, 1, 1, 4, 1, 0, 2, 3, 0, 2]
+const DAYS_AGO = DAILY_LEADS.flatMap((count, day) => Array(count).fill(DAILY_LEADS.length - 1 - day)).reverse()
 const SEED_ID_PREFIX = '6744b17e000000000000'
 const CONTACTS = [
   ['Avery Morgan', 'Asterfield Studio'],
@@ -52,7 +55,7 @@ export function buildSampleLeads(now) {
 
   return CONTACTS.map(([fullName, companyName], index) => {
     const _id = SEED_ID_PREFIX + (index + 1).toString(16).padStart(4, '0')
-    const createdAt = addUtcDays(today, -Math.floor(index * 29 / (CONTACTS.length - 1)))
+    const createdAt = addUtcDays(today, -DAYS_AGO[index])
 
     return {
       _id,
