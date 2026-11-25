@@ -16,7 +16,7 @@ BizLeap is a Mini CRM for tracking prospective customers from first contact thro
 | Layer | Technologies | Role |
 | --- | --- | --- |
 | Frontend | React 19, React Router 7, Vite 8 | Component-based UI, client routing and a development proxy for the API |
-| Design and charts | Tailwind CSS 3, IBM Plex Sans via Fontsource, Lucide React, Recharts 3 | Shared responsive styles, self-hosted fonts, icons and dashboard charts |
+| Design and charts | Tailwind CSS 3, Recharts 3 | Shared responsive styles, self-hosted fonts, icons and dashboard charts |
 | API | Node.js, Express 5 | REST routing, authentication and validation middleware, and consistent JSON responses |
 | Persistence | MongoDB, Mongoose 9 | Validated models, indexed lead ordering and database-side dashboard aggregation |
 | Security and testing | bcryptjs, jsonwebtoken, Helmet, express-rate-limit, Node.js test runner, ESLint | Password hashing, signed sessions, HTTP protections, regression tests and linting |
