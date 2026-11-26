@@ -8,7 +8,7 @@ import { ApiError } from '../utils/api-error.js'
 import { sessionCookieOptions } from '../utils/session.js'
 import { validateLogin } from '../validators/auth.js'
 
-export function authRouter({ appOrigin, jwtSecret, loginLimit, authenticate }) {
+export function authRouter({ appOrigin, jwtSecret, loginLimit, authenticate, ensureDatabase }) {
   const router = Router()
   const origin = requireOrigin(appOrigin)
   const cookieOptions = sessionCookieOptions(appOrigin)
@@ -22,7 +22,7 @@ export function authRouter({ appOrigin, jwtSecret, loginLimit, authenticate }) {
     },
   })
 
-  router.post('/login', origin, limitLogin, requireJson, parseJson, validateLogin, login(jwtSecret, cookieOptions))
+  router.post('/login', origin, limitLogin, requireJson, parseJson, validateLogin, login(jwtSecret, cookieOptions, ensureDatabase))
   router.get('/me', authenticate, me)
   router.post('/logout', origin, logout(cookieOptions))
   return router

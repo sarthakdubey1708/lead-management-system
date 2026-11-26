@@ -103,6 +103,15 @@ Open [http://localhost:5173](http://localhost:5173) and sign in using the admini
 
 **Note:** Windows PowerShell users can use `npm.cmd` instead of `npm` if script execution is restricted. Never commit actual `.env` files or credentials.
 
+
+## Vercel Deployment
+
+Use the repository root, the Other preset and Node.js 24.x. The settings in `vercel.json` install both packages, build the Vite frontend and route `/api` to the Express function in Mumbai (`bom1`). The UI and API share an HTTPS origin.
+
+Set `APP_ORIGIN` to the exact production HTTPS origin, `MONGODB_URI` to the Atlas URI for `lead_management`, and `JWT_SECRET` to a random 64-character hex key in Vercel's Production environment. The Atlas IP access list must permit Vercel's outbound connections.
+
+The API uses secure session cookies and exact-origin checks for writes. The Express login limiter applies per function instance. Vercel Hobby can add a regional IP limit through its included WAF rule.
+
 ## System Architecture
 
 ```mermaid

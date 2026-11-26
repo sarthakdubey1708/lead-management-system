@@ -7,9 +7,10 @@ import { publicUser, signSession } from '../utils/session.js'
 // Well-formed cost-12 dummy hash keeps unknown users on the bcrypt verification path.
 const dummyHash = '$2b$12$.....................................................'
 
-export function login(jwtSecret, cookieOptions) {
+export function login(jwtSecret, cookieOptions, ensureDatabase) {
   return async (req, res) => {
     const { email, password } = res.locals.credentials
+    await ensureDatabase?.()
     const user = await User.findOne({ email, role: ADMIN_ROLE }).select('+passwordHash').lean()
     const matches = await bcrypt.compare(password, user?.passwordHash ?? dummyHash)
     if (!user || !matches) {
