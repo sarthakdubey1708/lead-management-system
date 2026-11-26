@@ -2,6 +2,8 @@
 
 A responsive full-stack Mini CRM for managing potential customers, tracking lead status and monitoring sales pipeline performance. Built using React, Node.js, Express and MongoDB.
 
+[Open the live demo](https://bizleap-crm.vercel.app). Administrator sign-in is required.
+
 ## Screenshots
 
 ![Dashboard](docs/screenshots/desktop-dashboard.png)
@@ -110,7 +112,7 @@ Use the repository root, the Other preset and Node.js 24.x. The settings in `ver
 
 Set `APP_ORIGIN` to the exact production HTTPS origin, `MONGODB_URI` to the Atlas URI for `lead_management`, and `JWT_SECRET` to a random 64-character hex key in Vercel's Production environment. The Atlas IP access list must permit Vercel's outbound connections.
 
-The API uses secure session cookies and exact-origin checks for writes. The Express login limiter applies per function instance. Vercel Hobby can add a regional IP limit through its included WAF rule.
+The API uses secure session cookies and exact-origin checks for writes. The Express login limiter applies per function instance. The live demo also limits login requests to 10 per IP per minute in each Vercel firewall region.
 
 ## System Architecture
 
